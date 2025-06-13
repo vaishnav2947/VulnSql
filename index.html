@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SQL Injection Vulnerability Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
+  :root {
+    --gray-600: #6b7280;
+    --shadow-light: rgba(0,0,0,0.05);
+    --shadow-dark: rgba(0,0,0,0.1);
+  }
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: #ffffff;
+    color: var(--gray-600);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    z-index: 10;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header .logo {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #111827;
+  }
+  header nav a {
+    color: var(--gray-600);
+    text-decoration: none;
+    margin-left: 1.5rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  header nav a:hover {
+    color: #111827;
+  }
+  main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  h1.hero-title {
+    font-weight: 800;
+    font-size: 3rem;
+    color: #111827;
+    margin-bottom: 0.25rem;
+    max-width: 650px;
+  }
+  p.hero-subtitle {
+    font-size: 1.25rem;
+    max-width: 600px;
+    color: var(--gray-600);
+    margin-bottom: 3rem;
+  }
+  button.cta-btn {
+    background-color: #111827;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 1.125rem;
+    padding: 0.75rem 2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    user-select: none;
+  }
+  button.cta-btn:hover {
+    background-color: #374151;
+    transform: scale(1.05);
+  }
+  section.challenge {
+    background: #f9fafb;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px var(--shadow-light);
+    padding: 2rem;
+    margin-bottom: 2.5rem;
+  }
+  section.challenge h2 {
+    font-weight: 700;
+    font-size: 1.75rem;
+    color: #111827;
+    margin-bottom: 1rem;
+  }
+  section.challenge p.description {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  form {
+    max-width: 530px;
+  }
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #374151;
+  }
+  input[type="text"],
+  input[type="password"],
+  select {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font-size: 1rem;
+    border: 1.5px solid #d1d5db;
+    border-radius: 0.5rem;
+    margin-bottom: 1.25rem;
+    transition: border-color 0.3s ease;
+  }
+  input[type="text"]:focus,
+  input[type="password"]:focus,
+  select:focus {
+    outline: none;
+    border-color: #111827;
+  }
+  button[type="submit"] {
+    background-color: #111827;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.75rem 1.75rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.15s ease;
+  }
+  button[type="submit"]:hover {
+    background-color: #4b5563;
+    transform: scale(1.03);
+  }
+  .result {
+    margin-top: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 1.5px 3px var(--shadow-dark);
+    white-space: pre-wrap;
+    font-family: monospace;
+    color: #111827;
+  }
+  footer {
+    text-align: center;
+    color: var(--gray-600);
+    font-size: 0.875rem;
+    padding: 2rem 1rem;
+  }
+  @media (max-width: 640px) {
+    main {
+      padding: 0 1rem;
+    }
+    h1.hero-title {
+      font-size: 2.25rem;
+    }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" aria-label="SQL Injection Lab Logo">SQLi Lab</div>
+  <nav aria-label="Primary">
+    <a href="#basic-sqli">Basic SQLi</a>
+    <a href="#union-sqli">Union-Based SQLi</a>
+    <a href="#blind-sqli">Blind SQLi</a>
+  </nav>
+</header>
+<main>
+  <section class="hero">
+    <h1 class="hero-title">Explore Advanced SQL Injection Techniques</h1>
+    <p class="hero-subtitle">Interact with vulnerable web forms illustrating real-world SQL injection exploitation methods. Test your skills safely and deepen your understanding.</p>
+    <a href="#basic-sqli"><button class="cta-btn" aria-label="Start with Basic SQL Injection challenge">Get Started</button></a>
+  </section>
+
+  <section id="basic-sqli" class="challenge" tabindex="0" aria-label="Basic SQL Injection Challenge">
+    <h2>Challenge 1: Basic SQL Injection - Login Bypass</h2>
+    <p class="description">A simple login form vulnerable to basic SQL injection allowing bypass of authentication. Try to login without knowing the exact password by injecting SQL.</p>
+    <form id="login-form" autocomplete="off" aria-describedby="login-hint">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" required placeholder="e.g. admin or ' OR 1=1 --" aria-describedby="login-hint" />
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required placeholder="Try anything or leave blank" />
+      <button type="submit">Login</button>
+    </form>
+    <small id="login-hint">Hint: Try injecting <code>' OR '1'='1</code> or <code>' OR 1=1 --</code></small>
+    <pre id="login-result" class="result" aria-live="polite"></pre>
+  </section>
+
+  <section id="union-sqli" class="challenge" tabindex="0" aria-label="Union-Based SQL Injection Challenge">
+    <h2>Challenge 2: Union-Based SQL Injection - Data Extraction</h2>
+    <p class="description">A search feature vulnerable to union-based SQL injection. Use it to extract hidden data from database tables by crafting UNION SELECT statements.</p>
+    <form id="search-form" autocomplete="off" aria-describedby="search-hint">
+      <label for="search-query">Search Products</label>
+      <input type="text" id="search-query" name="search-query" placeholder="Try injecting ' UNION SELECT ..." />
+      <button type="submit">Search</button>
+    </form>
+    <small id="search-hint">Hint: The table has one column. Try <code>' UNION SELECT username FROM users--</code></small>
+    <pre id="search-result" class="result" aria-live="polite"></pre>
+  </section>
+
+  <section id="blind-sqli" class="challenge" tabindex="0" aria-label="Blind SQL Injection Challenge">
+    <h2>Challenge 3: Blind SQL Injection - Boolean & Time-Based</h2>
+    <p class="description">Interact with a form vulnerable to blind SQLi. Submit queries that conditionally delay responses to infer secrets bit-by-bit.</p>
+    <form id="blind-form" autocomplete="off" aria-describedby="blind-hint">
+      <label for="blind-query">Enter ID to get secret info</label>
+      <input type="text" id="blind-query" name="blind-query" placeholder="Try a numeric ID or an injection like: 1 OR IF(SUBSTR(password,1,1)='a',SLEEP(2),0)" />
+      <button type="submit">Submit</button>
+    </form>
+    <small id="blind-hint">Hint: Try Boolean or time-based injections using <code>SLEEP(2)</code> for delays.</small>
+    <pre id="blind-result" class="result" aria-live="polite"></pre>
+  </section>
+</main>
+<footer>
+  &copy; 2024 SQLi Lab - Educational Purposes Only
+</footer>
+<script>
+  // Simulated vulnerable backend data
+  const users = [
+    { username: 'admin', password: 'secret123' },
+    { username: 'guest', password: 'guestpass' },
+  ];
+
+  const products = [
+    { name: 'Gadget Pro' },
+    { name: 'Widget Max' },
+    { name: 'Device Plus' },
+  ];
+
+  // Basic SQL Injection Login Simulation (vulnerable)
+  document.getElementById('login-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const usernameInput = e.target.username.value.trim();
+    const passwordInput = e.target.password.value.trim();
+    let output = '';
+
+    /* Vulnerable logic simulating:
+      SELECT * FROM users WHERE username = '[input_username]' AND password = '[input_password]'
+      No sanitization, so injections in username or password can alter query logic.
+    */
+
+    // Simulate parsing query and evaluating injection via naive eval approach
+    // Using eval is unsafe in real but here simulates SQL injection logic loosely.
+
+    // Construct pseudo query condition
+    // We'll simulate by evaluating input as JS boolean expression with user data substituted
+    // We'll replace 'username' and 'password' as variables, and input strings must match exactly
+
+    // For demonstration, we support simple attacks like ' OR '1'='1
+    // Insecure evaluation approach for teaching only
+
+    const queryCondition = `(username == "${usernameInput.replace(/"/g, '\\"')}" && password == "${passwordInput.replace(/"/g, '\\"')}")`;
+
+    // Instead of eval, we'll check direct matching or tautology injections
+    function isInjectionValid(user) {
+      // naive checks for common injections
+      if (usernameInput.includes("' OR ") || usernameInput.includes('" OR ')) {
+        // if username contains OR injection, bypass password check
+        return true;
+      }
+      // else normal match
+      return user.username === usernameInput && user.password === passwordInput;
+    }
+
+    // check if any user matches
+    if (users.some(isInjectionValid)) {
+      output = 'Login successful! Welcome.';
+    } else {
+      output = 'Login failed: Invalid username or password.';
+    }
+
+    document.getElementById('login-result').textContent = output;
+  });
+
+  // Union-Based SQL Injection Simulation for Search
+  document.getElementById('search-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = e.target['search-query'].value.trim();
+    let output = '';
+    /* Vulnerable SQL:
+      SELECT name FROM products WHERE name LIKE '%[input]%';
+      Vulnerable to injection including UNION SELECT username FROM users
+    */
+
+    // Check if input contains UNION and simulate union select outcome
+    // Basic simulation: if input contains "UNION SELECT username", show users usernames list appended
+    // Otherwise show filtered products that contain input string
+
+    const lowerInput = input.toLowerCase();
+    if (lowerInput.includes('union select username')) {
+      // simulate union select output
+      output = 'Search Results:\n';
+      products.forEach(p => {
+        output += `Product: ${p.name}\n`;
+      });
+      output += '--- UNION ---\n';
+      users.forEach(u => {
+        output += `User: ${u.username}\n`;
+      });
+    } else {
+      // normal search in products (case-insensitive substring match)
+      const found = products.filter(p => p.name.toLowerCase().includes(input.toLowerCase()));
+      if (found.length) {
+        output = 'Search Results:\n' + found.map(p => `Product: ${p.name}`).join('\n');
+      } else {
+        output = 'No products found matching your query.';
+      }
+    }
+    document.getElementById('search-result').textContent = output;
+  });
+
+  // Blind SQL Injection Simulation
+  document.getElementById('blind-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const input = e.target['blind-query'].value.trim();
+    let output = '';
+    const secretPassword = 'secret123';
+
+    /* Vulnerable SQL simulated:
+    SELECT * FROM users WHERE id = [input]
+    Blind SQLi vulnerable to boolean and time-based attacks.
+
+    We simulate responses with time delay if the query contains SLEEP and condition matches.
+    For boolean injections, we simulate true/false output.
+    */
+
+    // Simulate parsing input, detect patterns like: IF(SUBSTR(password, 1, 1) = 's', SLEEP(2), 0)
+
+    // We will parse simple injections:
+    // if input includes SLEEP(n) AND condition true -> delay response by n seconds
+
+    // Basic patterns:
+    // Only support injection on first character of password (1-based indexing)
+    // Support Boolean check for SUBSTR(password, pos, len) = 'char'
+
+    const regexSleep = /SLEEP\((\d+)\)/i;
+    const regexSubstrCheck = /SUBSTR\(password\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*=\s*'([a-zA-Z0-9])'/i;
+
+    // Default response time (ms)
+    let delay = 0;
+    let conditionTrue = false;
+
+    // Check if input contains regexSubstrCheck
+    const substrCheckMatch = input.match(regexSubstrCheck);
+    if (substrCheckMatch) {
+      const pos = parseInt(substrCheckMatch[1], 10);
+      const len = parseInt(substrCheckMatch[2], 10);
+      const character = substrCheckMatch[3];
+
+      // Check if secret password has substring at position pos with length len equals character
+      const substr = secretPassword.substr(pos - 1, len);
+      if (substr === character) {
+        conditionTrue = true;
+      }
+    }
+
+    // Check SLEEP value
+    const sleepMatch = input.match(regexSleep);
+    if (sleepMatch && conditionTrue) {
+      delay = parseInt(sleepMatch[1], 10) * 1000;
+    }
+
+    // Simulate response time with delay
+    output = 'Processing request...';
+    document.getElementById('blind-result').textContent = output;
+
+    if (delay > 0) {
+      // Delay response to simulate time-based injection
+      await new Promise(r => setTimeout(r, delay));
+    } else {
+      // Minimal delay to simulate response time
+      await new Promise(r => setTimeout(r, 500));
+    }
+
+    if (conditionTrue) {
+      output = 'Condition TRUE: The substring matches the secret password!';
+    } else if (regexSubstrCheck.test(input)) {
+      output = 'Condition FALSE: The substring does NOT match the secret password.';
+    } else {
+      // Normal look up by numeric ID of user to simulate blind query
+      const id = parseInt(input, 10);
+      if (!isNaN(id) && id >= 1 && id <= users.length) {
+        output = `User found: ${users[id - 1].username}`;
+      } else {
+        output = 'No user found or invalid input.';
+      }
+    }
+    document.getElementById('blind-result').textContent = output;
+  });
+</script>
+</body>
+</html>
+
